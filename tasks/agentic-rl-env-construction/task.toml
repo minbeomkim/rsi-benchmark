@@ -60,6 +60,10 @@ license = "apache-2.0"
 [agent]
 timeout_sec = 21600
 user = "researcher"
+# Harbor applies this policy during agent.run(), including local validation.
+# Run-specific provider proxies are merged into this phase by the runner.
+network_mode = "allowlist"
+allowed_hosts = ["api.anthropic.com", "api.openai.com"]
 
 [environment]
 build_timeout_sec = 3600
@@ -68,9 +72,15 @@ memory_mb = 65536
 storage_mb = 40960
 gpus = 1
 gpu_types = ["H100"]
-# The agent must reach its own model endpoint. Weights, trainer, and target are baked in.
+# Baseline allowlist for harness provisioning; the agent phase is narrower above.
+# Weights, trainer, and validation dependencies are baked in.
 network_mode = "allowlist"
-allowed_hosts = ["api.anthropic.com", "api.openai.com"]
+allowed_hosts = [
+    "api.anthropic.com", "api.openai.com",
+    # Debian packages; NVM/Node/npm for Codex; native Claude Code installer.
+    "deb.debian.org", "raw.githubusercontent.com", "github.com",
+    "nodejs.org", "registry.npmjs.org", "downloads.claude.ai",
+]
 
 [environment.env]
 TASK_BUDGET_SECS = "21600"
